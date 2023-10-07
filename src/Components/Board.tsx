@@ -79,7 +79,7 @@ function Board({ toDos, boardId }: IBoardProps) {
             {toDos.map((toDo, index) => (
               <DraggableCard
                 key={toDo.id}
-                toDoId={toDo.text}
+                toDoId={toDo.id}
                 toDoText={toDo.text}
                 index={index}
               />
