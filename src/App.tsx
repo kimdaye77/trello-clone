@@ -3,6 +3,21 @@ import styled from "styled-components";
 import { toDoState } from "./atoms";
 import { useRecoilState } from "recoil";
 import Board from "./Components/Board";
+import { useForm } from "react-hook-form";
+
+const Container = styled.div`
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+`;
+
+const Title = styled.div`
+  font-size: 40px;
+  font-weight: bold;
+`;
 
 const Wrapper = styled.div`
   display: flex;
@@ -10,7 +25,6 @@ const Wrapper = styled.div`
   margin: 0 auto;
   justify-content: center;
   align-items: center;
-  height: 100vh;
 `;
 
 const Boards = styled.div`
@@ -21,8 +35,29 @@ const Boards = styled.div`
   gap: 10px;
 `;
 
+const Form = styled.form`
+  width: 100%;
+  input {
+    width: 100%;
+  }
+`;
+
+interface IForm {
+  category: string;
+}
+
 function App() {
   const [toDos, setToDos] = useRecoilState(toDoState);
+  const { register, handleSubmit } = useForm<IForm>();
+
+  const onValid = ({ category }: IForm) => {
+    setToDos((prev) => {
+      return {
+        ...prev,
+        [category]: [],
+      };
+    });
+  };
 
   const onDragEnd = (info: DropResult) => {
     const { destination, source } = info;
@@ -58,15 +93,25 @@ function App() {
   };
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Wrapper>
-        <Boards>
-          {Object.keys(toDos).map((boardId) => (
-            <Board key={boardId} toDos={toDos[boardId]} boardId={boardId} />
-          ))}
-        </Boards>
-      </Wrapper>
-    </DragDropContext>
+    <Container>
+      <Title>ToDos</Title>
+      <Form onSubmit={handleSubmit(onValid)}>
+        <input
+          {...register("category", { required: true })}
+          type="text"
+          placeholder={"Please enter the category name."}
+        />
+      </Form>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Wrapper>
+          <Boards>
+            {Object.keys(toDos).map((boardId) => (
+              <Board key={boardId} toDos={toDos[boardId]} boardId={boardId} />
+            ))}
+          </Boards>
+        </Wrapper>
+      </DragDropContext>
+    </Container>
   );
 }
 
