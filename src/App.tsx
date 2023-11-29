@@ -1,10 +1,10 @@
-import { DragDropContext, DropResult } from "react-beautiful-dnd";
+import { DragDropContext, DropResult, Droppable } from "react-beautiful-dnd";
 import styled from "styled-components";
-import { toDoState } from "./atoms";
+import { IToDoStage, toDoState } from "./atoms";
 import { useRecoilState } from "recoil";
-import Board from "./Components/Board";
 import { useForm } from "react-hook-form";
 import TrashCan from "./Components/TrashCan";
+import Board from "./Components/Board";
 
 const Container = styled.div`
   height: 100vh;
@@ -26,6 +26,7 @@ const Content = styled.div`
   align-items: center;
   justify-content: center;
   gap: 20px;
+  width: 100%;
 `;
 
 const Wrapper = styled.div`
@@ -66,7 +67,7 @@ interface IForm {
 
 function App() {
   const [toDos, setToDos] = useRecoilState(toDoState);
-  const { register, handleSubmit } = useForm<IForm>();
+  const { register, setValue, handleSubmit } = useForm<IForm>();
 
   const onValid = ({ category }: IForm) => {
     setToDos((prev) => {
@@ -75,12 +76,15 @@ function App() {
         [category]: [],
       };
     });
+    setValue("category", "");
   };
 
   const onDragEnd = (info: DropResult) => {
     const { destination, source } = info;
     if (!destination) return;
     if (destination.droppableId === "TrashCan") {
+      if (isNaN(Number(info.draggableId))) return;
+
       setToDos((allBoards) => {
         const sourceBoard = [...allBoards[source.droppableId]];
         sourceBoard.splice(source.index, 1);
@@ -91,7 +95,25 @@ function App() {
       });
       return;
     }
+    if (destination.droppableId === "board-list") {
+      setToDos((allBoards) => {
+        const keys = Object.keys({ ...allBoards });
+        const targetKey = keys[source.index];
+        keys.splice(source.index, 1);
+        keys.splice(destination.index, 0, targetKey);
+        const reorderedBoards = keys.reduce((acc: IToDoStage, key: string) => {
+          acc[key] = allBoards[key];
+          return acc;
+        }, {});
+
+        return reorderedBoards;
+      });
+      return;
+    }
+
     if (destination?.droppableId === source.droppableId) {
+      if (isNaN(Number(info.draggableId))) return;
+
       // same board movement.
       setToDos((allBoards) => {
         const boardCopy = [...allBoards[source.droppableId]];
@@ -103,8 +125,10 @@ function App() {
           [source.droppableId]: boardCopy,
         };
       });
+      return;
     }
     if (destination.droppableId !== source.droppableId) {
+      if (isNaN(Number(info.draggableId))) return;
       // cross board movement.
       setToDos((allBoards) => {
         const sourceBoard = [...allBoards[source.droppableId]];
@@ -118,6 +142,7 @@ function App() {
           [destination.droppableId]: destinationBoard,
         };
       });
+      return;
     }
   };
 
@@ -134,11 +159,20 @@ function App() {
       <DragDropContext onDragEnd={onDragEnd}>
         <Wrapper>
           <Content>
-            <Boards>
-              {Object.keys(toDos).map((boardId) => (
-                <Board key={boardId} toDos={toDos[boardId]} boardId={boardId} />
-              ))}
-            </Boards>
+            <Droppable droppableId="board-list" direction="horizontal">
+              {(magic) => (
+                <Boards ref={magic.innerRef} {...magic.droppableProps}>
+                  {Object.keys(toDos).map((boardId, index) => (
+                    <Board
+                      key={boardId}
+                      toDos={toDos[boardId]}
+                      boardId={boardId}
+                      index={index}
+                    />
+                  ))}
+                </Boards>
+              )}
+            </Droppable>
             <TrashCan />
           </Content>
         </Wrapper>

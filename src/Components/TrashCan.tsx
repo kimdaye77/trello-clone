@@ -36,6 +36,7 @@ const Area = styled.div<IAreaProps>`
   flex-grow: 1;
   transition: background-color 0.3s ease-in-out;
   padding: 20px;
+  margin-top: 10px;
 `;
 
 interface IBoardProps {}
