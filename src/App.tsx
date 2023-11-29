@@ -4,6 +4,7 @@ import { toDoState } from "./atoms";
 import { useRecoilState } from "recoil";
 import Board from "./Components/Board";
 import { useForm } from "react-hook-form";
+import TrashCan from "./Components/TrashCan";
 
 const Container = styled.div`
   height: 100vh;
@@ -17,6 +18,14 @@ const Container = styled.div`
 const Title = styled.div`
   font-size: 40px;
   font-weight: bold;
+`;
+
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
 `;
 
 const Wrapper = styled.div`
@@ -62,6 +71,17 @@ function App() {
   const onDragEnd = (info: DropResult) => {
     const { destination, source } = info;
     if (!destination) return;
+    if (destination.droppableId === "TrashCan") {
+      setToDos((allBoards) => {
+        const sourceBoard = [...allBoards[source.droppableId]];
+        sourceBoard.splice(source.index, 1);
+        return {
+          ...allBoards,
+          [source.droppableId]: sourceBoard,
+        };
+      });
+      return;
+    }
     if (destination?.droppableId === source.droppableId) {
       // same board movement.
       setToDos((allBoards) => {
@@ -104,11 +124,14 @@ function App() {
       </Form>
       <DragDropContext onDragEnd={onDragEnd}>
         <Wrapper>
-          <Boards>
-            {Object.keys(toDos).map((boardId) => (
-              <Board key={boardId} toDos={toDos[boardId]} boardId={boardId} />
-            ))}
-          </Boards>
+          <Content>
+            <Boards>
+              {Object.keys(toDos).map((boardId) => (
+                <Board key={boardId} toDos={toDos[boardId]} boardId={boardId} />
+              ))}
+            </Boards>
+            <TrashCan />
+          </Content>
         </Wrapper>
       </DragDropContext>
     </Container>
