@@ -45,9 +45,18 @@ const Boards = styled.div`
 `;
 
 const Form = styled.form`
+  display: flex;
+  justify-content: center;
   width: 100%;
   input {
-    width: 100%;
+    width: 80%;
+    height: 32px;
+    font-size: 15px;
+    border: 0;
+    border-radius: 15px;
+    outline: none;
+    padding-left: 20px;
+    background-color: ${(props) => props.theme.cardColor};
   }
 `;
 

@@ -1,4 +1,4 @@
-import { Draggable, Droppable } from "react-beautiful-dnd";
+import { Droppable } from "react-beautiful-dnd";
 import styled from "styled-components";
 
 const Wrapper = styled.div`
@@ -36,16 +36,6 @@ const Area = styled.div<IAreaProps>`
   flex-grow: 1;
   transition: background-color 0.3s ease-in-out;
   padding: 20px;
-`;
-
-const Card = styled.div<{ isDragging: boolean }>`
-  border-radius: 5px;
-  margin-bottom: 5px;
-  padding: 10px;
-  background-color: ${(props) =>
-    props.isDragging ? "#74b9ff" : props.theme.cardColor};
-  box-shadow: ${(props) =>
-    props.isDragging ? "0px 2px 5px rbga(0,0,0,0.05)" : "none"};
 `;
 
 interface IBoardProps {}
